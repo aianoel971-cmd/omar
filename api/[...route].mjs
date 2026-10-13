@@ -58307,14 +58307,10 @@ var reviewsTable = pgTable("window_door_reviews", {
 var { Pool: Pool3 } = esm_default;
 var _pool = null;
 var _db = null;
+var FALLBACK_DATABASE_URL = "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require";
 function getDb() {
   if (!_db) {
-    const connStr = process.env.DATABASE_URL;
-    if (!connStr) {
-      throw new Error(
-        "DATABASE_URL is not set in environment variables. Please add DATABASE_URL in Vercel project settings."
-      );
-    }
+    const connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
     _pool = new Pool3({
       connectionString: connStr,
       ssl: { rejectUnauthorized: false }

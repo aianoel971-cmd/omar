@@ -7,14 +7,12 @@ const { Pool } = pg;
 let _pool: pg.Pool | null = null;
 let _db: ReturnType<typeof drizzle> | null = null;
 
+const FALLBACK_DATABASE_URL =
+  "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require";
+
 export function getDb() {
   if (!_db) {
-    const connStr = process.env.DATABASE_URL;
-    if (!connStr) {
-      throw new Error(
-        "DATABASE_URL is not set in environment variables. Please add DATABASE_URL in Vercel project settings.",
-      );
-    }
+    const connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
     _pool = new Pool({
       connectionString: connStr,
       ssl: { rejectUnauthorized: false },
