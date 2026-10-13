@@ -1,0 +1,1 @@
+- [Clerk client compatibility](clerk-client-compatibility.md) — use the tested React SDK pairing until the workspace's Clerk shared APIs align.

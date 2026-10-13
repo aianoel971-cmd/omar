@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
-import { useAuth, useClerk } from '@clerk/react';
+import { useAuth, useClerk } from '@clerk/clerk-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   getGetBusinessSettingsQueryKey, getGetDashboardSummaryQueryKey, getListProductsQueryKey, getListQuotesQueryKey,

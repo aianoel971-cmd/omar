@@ -49,10 +49,6 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@clerk/shared/loadClerkJsScript': path.resolve(
-        import.meta.dirname,
-        'src/lib/clerk-loaders.ts',
-      ),
       '@': path.resolve(import.meta.dirname, 'src'),
       '@assets': path.resolve(
         import.meta.dirname,

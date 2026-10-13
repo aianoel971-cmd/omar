@@ -2,7 +2,7 @@ import { useListProducts, useGetBusinessSettings, useHealthCheck, getHealthCheck
 import { Link } from 'wouter';
 import { ArrowRight, ArrowUpRight, Check, ChevronRight, DoorOpen, Frame, Menu, Phone, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
-import { SignedOut } from '@clerk/react';
+import { SignedOut } from '@clerk/clerk-react';
 
 const productFallbacks = [
   { title: 'Windows that change the room', caption: 'Comfort, quiet, and a little more morning light.' },
