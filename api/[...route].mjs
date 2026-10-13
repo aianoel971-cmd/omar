@@ -58305,13 +58305,44 @@ var reviewsTable = pgTable("window_door_reviews", {
 
 // lib/db/src/index.ts
 var { Pool: Pool3 } = esm_default;
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+var _pool = null;
+var _db = null;
+function getDb() {
+  if (!_db) {
+    const connStr = process.env.DATABASE_URL;
+    if (!connStr) {
+      throw new Error(
+        "DATABASE_URL is not set in environment variables. Please add DATABASE_URL in Vercel project settings."
+      );
+    }
+    _pool = new Pool3({
+      connectionString: connStr,
+      ssl: { rejectUnauthorized: false }
+    });
+    _db = drizzle(_pool, { schema: schema_exports });
+  }
+  return _db;
 }
-var pool = new Pool3({ connectionString: process.env.DATABASE_URL });
-var db = drizzle(pool, { schema: schema_exports });
+function getPool() {
+  if (!_pool) {
+    getDb();
+  }
+  return _pool;
+}
+var pool = new Proxy({}, {
+  get(_target, prop) {
+    const p = getPool();
+    const val = p[prop];
+    return typeof val === "function" ? val.bind(p) : val;
+  }
+});
+var db = new Proxy({}, {
+  get(_target, prop) {
+    const database = getDb();
+    const val = database[prop];
+    return typeof val === "function" ? val.bind(database) : val;
+  }
+});
 
 // artifacts/api-server/src/lib/adminAuth.ts
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
@@ -58846,7 +58877,8 @@ var routes_default = router5;
 
 // artifacts/api-server/src/lib/logger.ts
 var import_pino = __toESM(require_pino(), 1);
-var isProduction = process.env.NODE_ENV === "production";
+var isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+var isProduction = process.env.NODE_ENV === "production" || isServerless;
 var logger2 = (0, import_pino.default)({
   level: process.env.LOG_LEVEL ?? "info",
   redact: [
@@ -60189,6 +60221,13 @@ if (clerkBypass) {
 }
 app.use("/api/uploads", import_express7.default.static(uploadsDir2));
 app.use("/api", routes_default);
+app.use(
+  (err, _req, res, _next) => {
+    logger2.error({ err }, "Unhandled server error");
+    const message = err instanceof Error ? err.message : "Internal server error";
+    res.status(500).json({ error: message });
+  }
+);
 var app_default = app;
 export {
   app_default as default
