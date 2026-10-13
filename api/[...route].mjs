@@ -58307,10 +58307,16 @@ var reviewsTable = pgTable("window_door_reviews", {
 var { Pool: Pool3 } = esm_default;
 var _pool = null;
 var _db = null;
-var FALLBACK_DATABASE_URL = "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require";
+var FALLBACK_DATABASE_URL = "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres";
 function getDb() {
   if (!_db) {
-    const connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
+    let connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
+    try {
+      const url = new URL(connStr);
+      url.searchParams.delete("sslmode");
+      connStr = url.toString();
+    } catch {
+    }
     _pool = new Pool3({
       connectionString: connStr,
       ssl: { rejectUnauthorized: false }

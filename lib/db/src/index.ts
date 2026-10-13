@@ -8,11 +8,17 @@ let _pool: pg.Pool | null = null;
 let _db: ReturnType<typeof drizzle> | null = null;
 
 const FALLBACK_DATABASE_URL =
-  "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?sslmode=require";
+  "postgresql://postgres.znqljlkdnbmivomjeszl:Z5BLuEYYw8794IuH@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres";
 
 export function getDb() {
   if (!_db) {
-    const connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
+    let connStr = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
+    try {
+      const url = new URL(connStr);
+      url.searchParams.delete("sslmode");
+      connStr = url.toString();
+    } catch {}
+
     _pool = new Pool({
       connectionString: connStr,
       ssl: { rejectUnauthorized: false },
