@@ -5,13 +5,7 @@ import { defineConfig } from 'vite';
 
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
-const rawPort = process.env.PORT;
-
-if (!rawPort) {
-  throw new Error(
-    'PORT environment variable is required but was not provided.',
-  );
-}
+const rawPort = process.env.PORT ?? '3000';
 
 const port = Number(rawPort);
 
@@ -19,13 +13,7 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const basePath = process.env.BASE_PATH;
-
-if (!basePath) {
-  throw new Error(
-    'BASE_PATH environment variable is required but was not provided.',
-  );
-}
+const basePath = process.env.BASE_PATH ?? '/';
 
 export default defineConfig({
   base: basePath,
@@ -48,15 +36,31 @@ export default defineConfig({
       : []),
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(import.meta.dirname, 'src'),
-      '@assets': path.resolve(
-        import.meta.dirname,
-        '..',
-        '..',
-        'attached_assets',
-      ),
-    },
+    alias: [
+      { find: '@', replacement: path.resolve(import.meta.dirname, 'src') },
+      {
+        find: '@assets',
+        replacement: path.resolve(
+          import.meta.dirname,
+          '..',
+          '..',
+          'attached_assets',
+        ),
+      },
+      ...(!process.env.REPL_ID &&
+      !process.env.VITE_CLERK_PUBLISHABLE_KEY &&
+      !process.env.CLERK_PUBLISHABLE_KEY
+        ? [
+            {
+              find: '@clerk/clerk-react',
+              replacement: path.resolve(
+                import.meta.dirname,
+                'src/lib/clerk-dev',
+              ),
+            },
+          ]
+        : []),
+    ],
     dedupe: ['react', 'react-dom'],
   },
   root: path.resolve(import.meta.dirname),
@@ -72,6 +76,9 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    proxy: !process.env.REPL_ID
+      ? { '/api': { target: 'http://localhost:8080', changeOrigin: true } }
+      : undefined,
   },
   preview: {
     port,

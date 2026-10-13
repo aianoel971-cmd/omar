@@ -1,58 +1,87 @@
 import { useListProducts, useGetBusinessSettings, useHealthCheck, getHealthCheckQueryKey } from '@workspace/api-client-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { ArrowRight, ArrowUpRight, Check, ChevronRight, DoorOpen, Frame, Menu, Phone, ShieldCheck, Sparkles, X } from 'lucide-react';
-import { useState } from 'react';
-import { SignedOut } from '@clerk/clerk-react';
+import { useEffect, useState } from 'react';
+import { ReviewSection } from '@/components/review-section';
 
 const productFallbacks = [
   { title: 'Windows that change the room', caption: 'Comfort, quiet, and a little more morning light.' },
   { title: 'An entry that feels like yours', caption: 'The first thing you see coming home should feel right.' },
 ];
 
-function Header({ businessName }: { businessName: string }) {
+export function Header({ businessName }: { businessName: string }) {
+  const [location] = useLocation();
   const [open, setOpen] = useState(false);
+  const isHome = location.replace(/\/+$/, '') === '';
+  const sectionNav = (id: string, label: string, testId: string) => isHome
+    ? <a key={id} href={`#${id}`} className="hover:text-[hsl(var(--primary))]" data-testid={testId}>{label}</a>
+    : <Link key={id} href={`/#${id}`} className="hover:text-[hsl(var(--primary))]" data-testid={testId}>{label}</Link>;
+  const sectionNavMobile = (id: string, label: string, testId: string) => isHome
+    ? <a key={id} href={`#${id}`} onClick={() => setOpen(false)} data-testid={testId}>{label}</a>
+    : <Link key={id} href={`/#${id}`} onClick={() => setOpen(false)} data-testid={testId}>{label}</Link>;
   return <header className="relative z-10 bg-[hsl(var(--background))]">
-    <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-10">
+    <div className="mx-auto flex max-w-full items-center justify-between px-5 py-5 md:px-10">
       <Link href="/" className="flex items-center gap-3" data-testid="link-home">
-        <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-10 w-10" />
+        <img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-16 w-16" />
         <div><div className="serif text-[1.08rem] font-extrabold tracking-tight">{businessName}</div><div className="eyebrow text-[.56rem] text-[hsl(var(--muted-foreground))]">Windows · Doors · Installation</div></div>
       </Link>
       <nav className="hidden items-center gap-8 text-sm font-semibold text-[hsl(var(--foreground))] md:flex" aria-label="Main navigation">
-        <a href="#work" className="hover:text-[hsl(var(--primary))]" data-testid="link-our-work">Our work</a>
-        <a href="#approach" className="hover:text-[hsl(var(--primary))]" data-testid="link-our-approach">Our approach</a>
+        {sectionNav('work', 'Our work', 'link-our-work')}
+        <Link href="/gallery" className="hover:text-[hsl(var(--primary))]" data-testid="link-nav-gallery">Gallery</Link>
+        {sectionNav('approach', 'Our approach', 'link-our-approach')}
         <Link href="/quote" className="btn-primary !px-5 !py-3" data-testid="link-nav-quote">Get a project quote <ArrowRight size={15}/></Link>
-        <SignedOut><Link href="/sign-in" className="text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]" data-testid="link-sign-in">Team sign in</Link></SignedOut>
       </nav>
       <button type="button" className="rounded-full border border-[hsl(var(--border))] p-2 md:hidden" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} onClick={() => setOpen(!open)} data-testid="button-mobile-menu">{open ? <X size={19}/> : <Menu size={19}/>}</button>
     </div>
     {open && <nav className="absolute left-0 right-0 top-full border-t border-[hsl(var(--border))] bg-[hsl(var(--background))] px-5 py-5 shadow-lg md:hidden" aria-label="Mobile navigation">
-      <div className="flex flex-col gap-4"><a href="#work" onClick={() => setOpen(false)} data-testid="link-mobile-work">Our work</a><a href="#approach" onClick={() => setOpen(false)} data-testid="link-mobile-approach">Our approach</a><Link href="/quote" className="btn-primary w-full" onClick={() => setOpen(false)} data-testid="link-mobile-quote">Get a project quote <ArrowRight size={16}/></Link><SignedOut><Link href="/sign-in" onClick={() => setOpen(false)} data-testid="link-mobile-signin">Team sign in</Link></SignedOut></div>
+      <div className="flex flex-col gap-4">{sectionNavMobile('work', 'Our work', 'link-mobile-work')}<Link href="/gallery" onClick={() => setOpen(false)} data-testid="link-mobile-gallery">Gallery</Link>{sectionNavMobile('approach', 'Our approach', 'link-mobile-approach')}<Link href="/quote" className="btn-primary w-full" onClick={() => setOpen(false)} data-testid="link-mobile-quote">Get a project quote <ArrowRight size={16}/></Link></div>
     </nav>}
   </header>;
 }
 
-function Footer({ businessName, phone }: { businessName: string; phone: string }) {
+export function Footer({ businessName, phone }: { businessName: string; phone: string }) {
   return <footer className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]">
-    <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:grid-cols-[1fr_auto] md:items-end md:px-10">
+    <div className="mx-auto grid max-w-full gap-10 px-5 py-14 md:grid-cols-[1fr_auto] md:items-end md:px-10">
       <div><div className="serif text-2xl font-bold">{businessName}</div><p className="mt-3 max-w-sm text-sm leading-6 opacity-75">Thoughtful window and door installation, from the first measure to the final sweep.</p></div>
-      <div className="flex flex-wrap gap-6 text-sm"><Link href="/quote" className="underline-offset-4 hover:underline" data-testid="link-footer-quote">Request a quote</Link><SignedOut><Link href="/sign-in" className="underline-offset-4 hover:underline" data-testid="link-footer-sign-in">Team sign in</Link></SignedOut><a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-2"><Phone size={15}/> {phone}</a></div>
+      <div className="flex flex-wrap gap-6 text-sm"><Link href="/gallery" className="underline-offset-4 hover:underline" data-testid="link-footer-gallery">Recent work</Link><Link href="/quote" className="underline-offset-4 hover:underline" data-testid="link-footer-quote">Request a quote</Link><a href={`tel:${phone.replace(/[^\d+]/g, '')}`} className="inline-flex items-center gap-2"><Phone size={15}/> {phone}</a></div>
       <div className="border-t border-white/20 pt-5 text-xs opacity-60 md:col-span-2">Local people. Clear numbers. A more comfortable home.</div>
     </div>
   </footer>;
 }
 
 export default function HomePage() {
+  const [location] = useLocation();
   const products = useListProducts();
   const settings = useGetBusinessSettings();
   const health = useHealthCheck({ query: { queryKey: getHealthCheckQueryKey() } });
   const featured = products.data?.filter((item) => item.featured) ?? [];
-  const businessName = settings.data?.businessName || 'Alder & Field';
+  const businessName = settings.data?.businessName || 'LopezXconstruction';
   const phone = settings.data?.phone || '(555) 014-2080';
+  const heroSlides = [
+    { src: `${import.meta.env.BASE_URL}hero-home.jpg`, alt: 'A craftsman home with a large new black-framed window' },
+    { src: `${import.meta.env.BASE_URL}house-windows.jpeg`, alt: 'A house with new double-hung windows installed' },
+    { src: `${import.meta.env.BASE_URL}entry-door.jpeg`, alt: 'A newly installed modern entry door' },
+    { src: `${import.meta.env.BASE_URL}casement-windows.jpg`, alt: 'Casement windows letting light into a bright room' },
+    { src: `${import.meta.env.BASE_URL}picture-windows.jpg`, alt: 'Picture windows with a clear view' },
+  ];
+  const [slide, setSlide] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setSlide((current) => (current + 1) % heroSlides.length), 5000);
+    return () => clearInterval(timer);
+  }, [heroSlides.length]);
+  useEffect(() => {
+    const id = window.location.hash.replace(/^#/, '');
+    if (id) {
+      requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+  }, [location]);
   return <main className="min-h-[100dvh]">
     <Header businessName={businessName}/>
-    <section className="mx-auto max-w-7xl px-5 pb-12 pt-5 md:px-10 md:pb-20 md:pt-4">
-      <div className="relative min-h-[600px] overflow-hidden rounded-[1.6rem] bg-[#d6d1c4] md:min-h-[680px]">
-        <img src={`${import.meta.env.BASE_URL}hero-home.jpg`} alt="A craftsman home with a large new black-framed window" className="absolute inset-0 h-full w-full object-cover object-center"/>
+    <section className="w-full pb-12 md:pb-20">
+      <div className="relative min-h-[600px] overflow-hidden bg-[#d6d1c4] md:min-h-[680px]">
+        {heroSlides.map((item, i) => <img key={item.src} src={item.src} alt={item.alt} className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[1500ms] ease-in-out ${i === slide ? 'opacity-100' : 'opacity-0'}`} data-testid={`img-hero-slide-${i}`}/>)}
         <div className="absolute inset-0 bg-gradient-to-r from-[#202f2b]/90 via-[#202f2b]/60 to-transparent"/>
         <div className="relative flex min-h-[600px] max-w-2xl flex-col justify-center px-7 py-14 text-[#f9f5ec] md:min-h-[680px] md:px-16">
           <div className="eyebrow mb-6 flex items-center gap-3 text-[#d9b18d]"><span className="h-px w-8 bg-[#d9b18d]"/>A good home begins at the edges</div>
@@ -64,12 +93,15 @@ export default function HomePage() {
           </div>
           <div className="mt-12 flex items-center gap-3 text-xs text-white/75"><ShieldCheck size={17} className="text-[#dbb68f]"/> Clear scope. Upfront pricing. No pressure.</div>
         </div>
-        <div className="absolute bottom-7 right-8 hidden text-right text-[10px] uppercase tracking-[.22em] text-white/70 lg:block">Alder & Field / Home 01</div>
+        <div className="absolute bottom-7 right-8 hidden text-right text-[10px] uppercase tracking-[.22em] text-white/70 lg:block">LopezXconstruction / Home 01</div>
+        <div className="absolute bottom-8 left-8 flex items-center gap-2" role="tablist" aria-label="Featured projects">
+          {heroSlides.map((item, i) => <button key={item.src} type="button" role="tab" aria-selected={i === slide} aria-label={`Slide ${i + 1}`} onClick={() => setSlide(i)} className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'w-7 bg-[#f2e7d5]' : 'w-2 bg-white/45 hover:bg-white/70'}`} data-testid={`button-hero-slide-${i}`}/>)}
+        </div>
       </div>
     </section>
 
-    <section id="approach" className="mx-auto grid max-w-7xl gap-10 px-5 py-16 md:grid-cols-[.8fr_1.2fr] md:px-10 md:py-24">
-      <div><p className="eyebrow text-[hsl(var(--primary))]">The Alder & Field difference</p><h2 className="serif mt-5 max-w-sm text-4xl font-semibold leading-[1.06] tracking-tight md:text-5xl">Good work starts with a good conversation.</h2></div>
+    <section id="approach" className="mx-auto grid max-w-full gap-10 px-5 py-16 md:grid-cols-[.8fr_1.2fr] md:px-10 md:py-24">
+      <div><p className="eyebrow text-[hsl(var(--primary))]">The LopezXconstruction difference</p><h2 className="serif mt-5 max-w-sm text-4xl font-semibold leading-[1.06] tracking-tight md:text-5xl">Good work starts with a good conversation.</h2></div>
       <div className="grid gap-8 sm:grid-cols-2">
         {[{ icon: <Sparkles/>, title: 'A considered recommendation', text: 'We listen to what the room needs, then help you compare options that make sense for your home.' },{ icon: <Frame/>, title: 'A fit worth getting right', text: 'Careful measuring and a tidy installation protect the character of your home and the comfort inside it.' }].map((item) => <article key={item.title} className="border-t border-[hsl(var(--border))] pt-5">
           <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">{item.icon}</div><h3 className="serif text-xl font-bold">{item.title}</h3><p className="mt-3 text-sm leading-6 text-[hsl(var(--muted-foreground))]">{item.text}</p>
@@ -78,7 +110,7 @@ export default function HomePage() {
     </section>
 
     <section id="work" className="bg-[#e9e5da] py-16 md:py-24">
-      <div className="mx-auto max-w-7xl px-5 md:px-10">
+      <div className="mx-auto max-w-full px-5 md:px-10">
         <div className="mb-9 flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><p className="eyebrow text-[hsl(var(--primary))]">Made for the way you live</p><h2 className="serif mt-3 text-4xl font-semibold tracking-tight">A better view of home.</h2></div><Link href="/quote" className="inline-flex items-center gap-2 text-sm font-bold text-[hsl(var(--primary))]" data-testid="link-products-quote">Explore your options <ArrowUpRight size={16}/></Link></div>
         {products.isLoading ? <div className="grid gap-4 md:grid-cols-2"><div className="h-72 animate-pulse rounded-2xl bg-[#dcd7cc]"/><div className="h-72 animate-pulse rounded-2xl bg-[#dcd7cc]"/></div> : products.isError ? <div className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-7" role="alert"><p className="font-semibold">Our collection is taking a moment to load.</p><button className="mt-4 text-sm font-bold underline" onClick={() => products.refetch()} data-testid="button-retry-products">Try again</button></div> : products.data?.length ? <div className="grid gap-5 md:grid-cols-2">{products.data.map((item, index) => <article key={item.id} data-testid={`card-product-${item.id}`} className={`group relative min-h-[350px] overflow-hidden rounded-2xl bg-[hsl(var(--primary))] p-7 text-white md:p-9 ${index === 0 ? 'md:min-h-[420px]' : 'md:mt-12 md:min-h-[380px]'}`}>
           {item.imageUrl ? <img src={item.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.025]"/> : <div className="absolute inset-0 flex items-center justify-center bg-[linear-gradient(145deg,#7f9787,#354a42)]"><div className="flex h-44 w-36 items-center justify-center border border-white/40"><div className="h-full w-2/3 border-x border-white/50"/><div className="absolute h-px w-36 bg-white/50"/></div></div>}
@@ -89,22 +121,22 @@ export default function HomePage() {
       </div>
     </section>
 
-    <section className="mx-auto max-w-7xl px-5 py-16 md:px-10 md:py-24">
+    <section className="mx-auto max-w-full px-5 py-16 md:px-10 md:py-24">
       <div className="grid items-center gap-12 rounded-[1.5rem] bg-[#d8dfd6] p-7 md:grid-cols-[.9fr_1.1fr] md:p-14">
         <div><p className="eyebrow text-[hsl(var(--primary))]">The right start</p><h2 className="serif mt-4 text-4xl font-semibold leading-tight md:text-5xl">Your home.<br/>Your call.</h2><p className="mt-5 max-w-md text-sm leading-7 text-[hsl(var(--muted-foreground))]">Get a clear preliminary range based on what you’re considering. Then, if it feels right, we’ll put together a personal quote around your home and your plans.</p><Link href="/quote" className="btn-primary mt-7" data-testid="link-estimate-cta">Build your estimate <ArrowRight size={16}/></Link></div>
-        <div className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl bg-[#b8c5b7] p-8">
-          <div className="absolute -right-10 -top-14 h-56 w-56 rounded-full border border-white/35"/><div className="absolute -right-3 -top-7 h-56 w-56 rounded-full border border-white/30"/>
-          <div className="relative w-full max-w-[390px] border-[10px] border-[#31463f] bg-[#e8e5d8] p-3 shadow-[0_24px_50px_rgba(42,59,50,.2)]"><div className="grid aspect-[1.55] grid-cols-2 gap-2 bg-[#31463f] p-2"><div className="bg-gradient-to-br from-[#dde6db] to-[#91a99a]"/><div className="bg-gradient-to-br from-[#e7dfca] to-[#aab8a3]"/></div></div>
+        <div className="relative flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl bg-[#b8c5b7]">
+          <img src={`${import.meta.env.BASE_URL}house-windows.jpeg`} alt="A house with new double-hung windows installed" className="absolute inset-0 h-full w-full object-cover"/>
           <div className="absolute bottom-5 left-5 rounded-full bg-[#f8f4eb] px-4 py-2 text-xs font-semibold text-[#304b43]"><Check size={14} className="mr-1 inline"/> No pressure, ever</div>
         </div>
       </div>
     </section>
     <section className="border-y border-[hsl(var(--border))] bg-[hsl(var(--background))]">
-      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-10">
+      <div className="mx-auto flex max-w-full flex-col gap-5 px-5 py-12 md:flex-row md:items-center md:justify-between md:px-10">
         <div><p className="eyebrow text-[hsl(var(--muted-foreground))]">A neighborly kind of service</p><p className="serif mt-2 text-2xl font-bold">People who answer the phone. Installers who leave it tidy.</p></div>
         <Link href="/quote" className="btn-secondary" data-testid="link-bottom-quote">Let's talk about your project <ArrowRight size={16}/></Link>
       </div>
     </section>
+    <ReviewSection/>
     <Footer businessName={businessName} phone={phone}/>
   </main>;
 }

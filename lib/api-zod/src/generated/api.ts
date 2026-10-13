@@ -41,6 +41,62 @@ export const ListProductsResponse = zod.array(ListProductsResponseItem)
 
 
 /**
+ * @summary Add a new product to the catalog
+ */
+export const createProductBodyNameMin = 2;
+export const createProductBodyNameMax = 120;
+
+export const createProductBodyDescriptionMax = 600;
+
+
+export const createProductBodyFeaturesItemMax = 120;
+
+
+
+export const CreateProductBody = zod.object({
+  "name": zod.string().min(createProductBodyNameMin).max(createProductBodyNameMax),
+  "category": zod.enum(['window', 'door']),
+  "description": zod.string().min(1).max(createProductBodyDescriptionMax),
+  "startingPrice": zod.number().min(1),
+  "imageUrl": zod.string().nullish(),
+  "badge": zod.string().nullish(),
+  "active": zod.boolean().optional(),
+  "featured": zod.boolean().optional(),
+  "features": zod.array(zod.string().max(createProductBodyFeaturesItemMax)).optional()
+})
+
+export const CreateProductResponse = zod.object({
+  "id": zod.string(),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "category": zod.enum(['window', 'door']),
+  "description": zod.string(),
+  "startingPrice": zod.number(),
+  "imageUrl": zod.string().nullish(),
+  "active": zod.boolean(),
+  "featured": zod.boolean(),
+  "badge": zod.string().nullish(),
+  "features": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Upload a product image as a base64 data URL
+ */
+export const uploadImageBodyDataUrlMax = 12000000;
+
+
+
+export const UploadImageBody = zod.object({
+  "dataUrl": zod.string().max(uploadImageBodyDataUrlMax)
+})
+
+export const UploadImageResponse = zod.object({
+  "url": zod.string()
+})
+
+
+/**
  * @summary Update a product
  */
 export const UpdateProductParams = zod.object({
@@ -55,6 +111,7 @@ export const UpdateProductBody = zod.object({
   "name": zod.string().min(1).optional(),
   "description": zod.string().optional(),
   "startingPrice": zod.number().min(1).optional(),
+  "imageUrl": zod.string().nullish(),
   "active": zod.boolean().optional(),
   "featured": zod.boolean().optional(),
   "badge": zod.string().nullish(),
@@ -216,6 +273,121 @@ export const UpdateQuoteResponse = zod.object({
   "status": zod.enum(['new', 'contacted', 'scheduled', 'won', 'lost']),
   "notes": zod.string().nullish(),
   "adminNote": zod.string().nullish(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List published customer reviews
+ */
+export const listReviewsResponseRatingMax = 5;
+
+
+
+export const ListReviewsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "rating": zod.number().int().min(1).max(listReviewsResponseRatingMax),
+  "comment": zod.string(),
+  "approved": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListReviewsResponse = zod.array(ListReviewsResponseItem)
+
+
+/**
+ * @summary Submit a customer review
+ */
+export const createReviewBodyNameMin = 2;
+export const createReviewBodyNameMax = 120;
+
+export const createReviewBodyRatingMax = 5;
+
+export const createReviewBodyCommentMin = 5;
+export const createReviewBodyCommentMax = 1200;
+
+
+
+export const CreateReviewBody = zod.object({
+  "name": zod.string().min(createReviewBodyNameMin).max(createReviewBodyNameMax),
+  "rating": zod.number().int().min(1).max(createReviewBodyRatingMax),
+  "comment": zod.string().min(createReviewBodyCommentMin).max(createReviewBodyCommentMax)
+})
+
+export const createReviewResponseRatingMax = 5;
+
+
+
+export const CreateReviewResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "rating": zod.number().int().min(1).max(createReviewResponseRatingMax),
+  "comment": zod.string(),
+  "approved": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List all customer reviews including hidden ones
+ */
+export const listAdminReviewsResponseRatingMax = 5;
+
+
+
+export const ListAdminReviewsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "rating": zod.number().int().min(1).max(listAdminReviewsResponseRatingMax),
+  "comment": zod.string(),
+  "approved": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAdminReviewsResponse = zod.array(ListAdminReviewsResponseItem)
+
+
+/**
+ * @summary Approve or hide a review
+ */
+export const UpdateReviewParams = zod.object({
+  "reviewId": zod.coerce.string()
+})
+
+export const UpdateReviewBody = zod.object({
+  "approved": zod.boolean().optional()
+})
+
+export const updateReviewResponseRatingMax = 5;
+
+
+
+export const UpdateReviewResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "rating": zod.number().int().min(1).max(updateReviewResponseRatingMax),
+  "comment": zod.string(),
+  "approved": zod.boolean(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete a review
+ */
+export const DeleteReviewParams = zod.object({
+  "reviewId": zod.coerce.string()
+})
+
+export const deleteReviewResponseRatingMax = 5;
+
+
+
+export const DeleteReviewResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "rating": zod.number().int().min(1).max(deleteReviewResponseRatingMax),
+  "comment": zod.string(),
+  "approved": zod.boolean(),
   "createdAt": zod.coerce.date()
 })
 

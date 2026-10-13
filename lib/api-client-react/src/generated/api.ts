@@ -29,10 +29,16 @@ import type {
   ListProductsParams,
   ListQuotesParams,
   Product,
+  ProductInput,
   ProductUpdate,
   Quote,
   QuoteInput,
-  QuoteUpdate
+  QuoteUpdate,
+  Review,
+  ReviewInput,
+  ReviewUpdate,
+  UploadInput,
+  UploadResult
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -223,6 +229,182 @@ export function useListProducts<TData = Awaited<ReturnType<typeof listProducts>>
 
 
 
+
+export const getCreateProductUrl = () => {
+
+
+
+
+  return `/api/products`
+}
+
+/**
+ * @summary Add a new product to the catalog
+ */
+export const createProduct = async (productInput: ProductInput, options?: Parameters<typeof customFetch>[1]): Promise<Product> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Product>(getCreateProductUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(productInput)
+  }
+);}
+
+
+
+
+
+export const getCreateProductMutationKey = () => ['createProduct'] as const;
+
+export const getCreateProductMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError,CreateProductMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError,CreateProductMutationVariables, TContext> => {
+
+const mutationKey = getCreateProductMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProduct>>, CreateProductMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createProduct(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProductMutationResult = NonNullable<Awaited<ReturnType<typeof createProduct>>>
+    export type CreateProductMutationBody = BodyType<ProductInput>
+    export type CreateProductMutationError = ErrorType<unknown>
+    export type CreateProductMutationVariables = {data: BodyType<ProductInput>}
+
+    /**
+ * @summary Add a new product to the catalog
+ */
+export const useCreateProduct = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProduct>>, TError,CreateProductMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProduct>>,
+        TError,
+        CreateProductMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateProductMutationOptions(options));
+    }
+
+export const getUploadImageUrl = () => {
+
+
+
+
+  return `/api/uploads`
+}
+
+/**
+ * @summary Upload a product image as a base64 data URL
+ */
+export const uploadImage = async (uploadInput: UploadInput, options?: Parameters<typeof customFetch>[1]): Promise<UploadResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<UploadResult>(getUploadImageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(uploadInput)
+  }
+);}
+
+
+
+
+
+export const getUploadImageMutationKey = () => ['uploadImage'] as const;
+
+export const getUploadImageMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,UploadImageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,UploadImageMutationVariables, TContext> => {
+
+const mutationKey = getUploadImageMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadImage>>, UploadImageMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadImage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadImageMutationResult = NonNullable<Awaited<ReturnType<typeof uploadImage>>>
+    export type UploadImageMutationBody = BodyType<UploadInput>
+    export type UploadImageMutationError = ErrorType<void>
+    export type UploadImageMutationVariables = {data: BodyType<UploadInput>}
+
+    /**
+ * @summary Upload a product image as a base64 data URL
+ */
+export const useUploadImage = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadImage>>, TError,UploadImageMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadImage>>,
+        TError,
+        UploadImageMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUploadImageMutationOptions(options));
+    }
 
 export const getUpdateProductUrl = (productId: string,) => {
 
@@ -660,6 +842,411 @@ export const useUpdateQuote = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateQuoteMutationOptions(options));
+    }
+
+export const getListReviewsUrl = () => {
+
+
+
+
+  return `/api/reviews`
+}
+
+/**
+ * @summary List published customer reviews
+ */
+export const listReviews = async ( options?: Parameters<typeof customFetch>[1]): Promise<Review[]> => {
+
+  return customFetch<Review[]>(getListReviewsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListReviewsQueryKey = () => {
+    return [
+    `/api/reviews`
+    ] as const;
+    }
+
+
+export const getListReviewsQueryOptions = <TData = Awaited<ReturnType<typeof listReviews>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListReviewsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listReviews>>> = ({ signal }) => listReviews({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listReviews>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListReviewsQueryResult = NonNullable<Awaited<ReturnType<typeof listReviews>>>
+export type ListReviewsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List published customer reviews
+ */
+
+export function useListReviews<TData = Awaited<ReturnType<typeof listReviews>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListReviewsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateReviewUrl = () => {
+
+
+
+
+  return `/api/reviews`
+}
+
+/**
+ * @summary Submit a customer review
+ */
+export const createReview = async (reviewInput: ReviewInput, options?: Parameters<typeof customFetch>[1]): Promise<Review> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Review>(getCreateReviewUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reviewInput)
+  }
+);}
+
+
+
+
+
+export const getCreateReviewMutationKey = () => ['createReview'] as const;
+
+export const getCreateReviewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,CreateReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,CreateReviewMutationVariables, TContext> => {
+
+const mutationKey = getCreateReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReview>>, CreateReviewMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createReview(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateReviewMutationResult = NonNullable<Awaited<ReturnType<typeof createReview>>>
+    export type CreateReviewMutationBody = BodyType<ReviewInput>
+    export type CreateReviewMutationError = ErrorType<unknown>
+    export type CreateReviewMutationVariables = {data: BodyType<ReviewInput>}
+
+    /**
+ * @summary Submit a customer review
+ */
+export const useCreateReview = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,CreateReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createReview>>,
+        TError,
+        CreateReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateReviewMutationOptions(options));
+    }
+
+export const getListAdminReviewsUrl = () => {
+
+
+
+
+  return `/api/admin/reviews`
+}
+
+/**
+ * @summary List all customer reviews including hidden ones
+ */
+export const listAdminReviews = async ( options?: Parameters<typeof customFetch>[1]): Promise<Review[]> => {
+
+  return customFetch<Review[]>(getListAdminReviewsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminReviewsQueryKey = () => {
+    return [
+    `/api/admin/reviews`
+    ] as const;
+    }
+
+
+export const getListAdminReviewsQueryOptions = <TData = Awaited<ReturnType<typeof listAdminReviews>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminReviewsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminReviews>>> = ({ signal }) => listAdminReviews({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminReviewsQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminReviews>>>
+export type ListAdminReviewsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all customer reviews including hidden ones
+ */
+
+export function useListAdminReviews<TData = Awaited<ReturnType<typeof listAdminReviews>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminReviewsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateReviewUrl = (reviewId: string,) => {
+
+
+
+
+  return `/api/admin/reviews/${reviewId}`
+}
+
+/**
+ * @summary Approve or hide a review
+ */
+export const updateReview = async (reviewId: string,
+    reviewUpdate: ReviewUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Review> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Review>(getUpdateReviewUrl(reviewId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reviewUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateReviewMutationKey = () => ['updateReview'] as const;
+
+export const getUpdateReviewMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReview>>, TError,UpdateReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateReview>>, TError,UpdateReviewMutationVariables, TContext> => {
+
+const mutationKey = getUpdateReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateReview>>, UpdateReviewMutationVariables> = (props) => {
+          const {reviewId,data} = props ?? {};
+
+          return  updateReview(reviewId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateReviewMutationResult = NonNullable<Awaited<ReturnType<typeof updateReview>>>
+    export type UpdateReviewMutationBody = BodyType<ReviewUpdate>
+    export type UpdateReviewMutationError = ErrorType<void>
+    export type UpdateReviewMutationVariables = {reviewId: string;data: BodyType<ReviewUpdate>}
+
+    /**
+ * @summary Approve or hide a review
+ */
+export const useUpdateReview = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReview>>, TError,UpdateReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateReview>>,
+        TError,
+        UpdateReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateReviewMutationOptions(options));
+    }
+
+export const getDeleteReviewUrl = (reviewId: string,) => {
+
+
+
+
+  return `/api/admin/reviews/${reviewId}`
+}
+
+/**
+ * @summary Delete a review
+ */
+export const deleteReview = async (reviewId: string, options?: Parameters<typeof customFetch>[1]): Promise<Review> => {
+
+  return customFetch<Review>(getDeleteReviewUrl(reviewId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteReviewMutationKey = () => ['deleteReview'] as const;
+
+export const getDeleteReviewMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext> => {
+
+const mutationKey = getDeleteReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteReview>>, DeleteReviewMutationVariables> = (props) => {
+          const {reviewId} = props ?? {};
+
+          return  deleteReview(reviewId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteReviewMutationResult = NonNullable<Awaited<ReturnType<typeof deleteReview>>>
+
+    export type DeleteReviewMutationError = ErrorType<void>
+    export type DeleteReviewMutationVariables = {reviewId: string}
+
+    /**
+ * @summary Delete a review
+ */
+export const useDeleteReview = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteReview>>,
+        TError,
+        DeleteReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteReviewMutationOptions(options));
     }
 
 export const getGetDashboardSummaryUrl = () => {

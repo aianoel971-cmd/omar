@@ -39,11 +39,54 @@ export interface ProductUpdate {
   description?: string;
   /** @minimum 1 */
   startingPrice?: number;
+  /** @nullable */
+  imageUrl?: string | null;
   active?: boolean;
   featured?: boolean;
   /** @nullable */
   badge?: string | null;
   features?: string[];
+}
+
+export type ProductInputCategory = typeof ProductInputCategory[keyof typeof ProductInputCategory];
+
+
+export const ProductInputCategory = {
+  window: 'window',
+  door: 'door',
+} as const;
+
+export interface ProductInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  category: ProductInputCategory;
+  /**
+     * @minLength 1
+     * @maxLength 600
+     */
+  description: string;
+  /** @minimum 1 */
+  startingPrice: number;
+  /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
+  badge?: string | null;
+  active?: boolean;
+  featured?: boolean;
+  /** @items.maxLength 120 */
+  features?: string[];
+}
+
+export interface UploadInput {
+  /** @maxLength 12000000 */
+  dataUrl: string;
+}
+
+export interface UploadResult {
+  url: string;
 }
 
 export interface EstimateInput {
@@ -218,6 +261,41 @@ export interface BusinessSettingsUpdate {
      * @maximum 100
      */
   estimateBufferPercent?: number;
+}
+
+export interface Review {
+  id: string;
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  comment: string;
+  approved: boolean;
+  createdAt: string;
+}
+
+export interface ReviewInput {
+  /**
+     * @minLength 2
+     * @maxLength 120
+     */
+  name: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /**
+     * @minLength 5
+     * @maxLength 1200
+     */
+  comment: string;
+}
+
+export interface ReviewUpdate {
+  approved?: boolean;
 }
 
 export type ListProductsParams = {

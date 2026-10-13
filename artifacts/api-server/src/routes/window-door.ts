@@ -4,14 +4,22 @@ import { Router, type IRouter } from "express";
 import {
   CalculateEstimateBody,
   CalculateEstimateResponse,
+  CreateProductBody,
+  CreateProductResponse,
   CreateQuoteBody,
   CreateQuoteResponse,
+  CreateReviewBody,
+  CreateReviewResponse,
+  DeleteReviewParams,
+  DeleteReviewResponse,
   GetBusinessSettingsResponse,
   GetDashboardSummaryResponse,
   ListProductsQueryParams,
   ListProductsResponse,
   ListQuotesQueryParams,
   ListQuotesResponse,
+  ListAdminReviewsResponse,
+  ListReviewsResponse,
   UpdateBusinessSettingsBody,
   UpdateBusinessSettingsResponse,
   UpdateProductBody,
@@ -20,14 +28,18 @@ import {
   UpdateQuoteBody,
   UpdateQuoteParams,
   UpdateQuoteResponse,
+  UpdateReviewBody,
+  UpdateReviewParams,
+  UpdateReviewResponse,
 } from "@workspace/api-zod";
 import {
   businessSettingsTable,
   db,
   productsTable,
   quotesTable,
+  reviewsTable,
 } from "@workspace/db";
-import { requireAuth } from "../middlewares/requireAuth";
+import { requireAdminAuth } from "../middlewares/requireAdminAuth";
 
 const router: IRouter = Router();
 
@@ -62,7 +74,7 @@ router.get(
       next();
       return;
     }
-    await requireAuth(req, res, next);
+    await requireAdminAuth(req, res, next);
   },
   async (req, res): Promise<void> => {
     const parsed = ListProductsQueryParams.safeParse(req.query);
@@ -84,9 +96,53 @@ router.get(
   },
 );
 
+router.post("/products", requireAdminAuth, async (req, res): Promise<void> => {
+  const body = CreateProductBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+
+  const base =
+    body.data.name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "product";
+  let slug = base;
+  let suffix = 2;
+  for (;;) {
+    const [existing] = await db
+      .select({ id: productsTable.id })
+      .from(productsTable)
+      .where(eq(productsTable.slug, slug));
+    if (!existing) break;
+    slug = `${base}-${suffix++}`;
+  }
+
+  const [product] = await db
+    .insert(productsTable)
+    .values({
+      id: randomUUID(),
+      slug,
+      name: body.data.name,
+      category: body.data.category,
+      description: body.data.description,
+      startingPrice: Math.round(body.data.startingPrice),
+      imageUrl: body.data.imageUrl ?? null,
+      active: body.data.active ?? true,
+      featured: body.data.featured ?? false,
+      badge: body.data.badge ?? null,
+      features: body.data.features ?? [],
+    })
+    .returning();
+
+  res.status(201).json(CreateProductResponse.parse(product));
+});
+
 router.patch(
   "/products/:productId",
-  requireAuth,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const params = UpdateProductParams.safeParse(req.params);
     if (!params.success) {
@@ -132,7 +188,7 @@ router.post("/estimates", async (req, res): Promise<void> => {
   res.json(CalculateEstimateResponse.parse(estimate));
 });
 
-router.get("/quotes", requireAuth, async (req, res): Promise<void> => {
+router.get("/quotes", requireAdminAuth, async (req, res): Promise<void> => {
   const query = ListQuotesQueryParams.safeParse(req.query);
   if (!query.success) {
     res.status(400).json({ error: query.error.message });
@@ -209,7 +265,7 @@ router.post("/quotes", async (req, res): Promise<void> => {
 
 router.patch(
   "/quotes/:quoteId",
-  requireAuth,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const params = UpdateQuoteParams.safeParse(req.params);
     if (!params.success) {
@@ -235,9 +291,97 @@ router.patch(
   },
 );
 
+router.get("/reviews", async (_req, res): Promise<void> => {
+  const reviews = await db
+    .select()
+    .from(reviewsTable)
+    .where(eq(reviewsTable.approved, true))
+    .orderBy(desc(reviewsTable.createdAt));
+  res.json(ListReviewsResponse.parse(reviews));
+});
+
+router.post("/reviews", async (req, res): Promise<void> => {
+  const body = CreateReviewBody.safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: body.error.message });
+    return;
+  }
+
+  const [review] = await db
+    .insert(reviewsTable)
+    .values({
+      id: randomUUID(),
+      name: body.data.name,
+      rating: body.data.rating,
+      comment: body.data.comment,
+      approved: true,
+    })
+    .returning();
+
+  res.status(201).json(CreateReviewResponse.parse(review));
+});
+
+router.get("/admin/reviews", requireAdminAuth, async (_req, res): Promise<void> => {
+  const reviews = await db
+    .select()
+    .from(reviewsTable)
+    .orderBy(desc(reviewsTable.createdAt));
+  res.json(ListAdminReviewsResponse.parse(reviews));
+});
+
+router.patch(
+  "/admin/reviews/:reviewId",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const params = UpdateReviewParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+    const body = UpdateReviewBody.safeParse(req.body);
+    if (!body.success) {
+      res.status(400).json({ error: body.error.message });
+      return;
+    }
+
+    const [review] = await db
+      .update(reviewsTable)
+      .set(body.data)
+      .where(eq(reviewsTable.id, params.data.reviewId))
+      .returning();
+    if (!review) {
+      res.status(404).json({ error: "Review not found" });
+      return;
+    }
+    res.json(UpdateReviewResponse.parse(review));
+  },
+);
+
+router.delete(
+  "/admin/reviews/:reviewId",
+  requireAdminAuth,
+  async (req, res): Promise<void> => {
+    const params = DeleteReviewParams.safeParse(req.params);
+    if (!params.success) {
+      res.status(400).json({ error: params.error.message });
+      return;
+    }
+
+    const [review] = await db
+      .delete(reviewsTable)
+      .where(eq(reviewsTable.id, params.data.reviewId))
+      .returning();
+    if (!review) {
+      res.status(404).json({ error: "Review not found" });
+      return;
+    }
+    res.json(DeleteReviewResponse.parse(review));
+  },
+);
+
 router.get(
   "/admin/summary",
-  requireAuth,
+  requireAdminAuth,
   async (_req, res): Promise<void> => {
     const quotes = await db.select().from(quotesTable);
     const openQuotes = quotes.filter(
@@ -275,7 +419,7 @@ router.get(
 
 router.patch(
   "/admin/settings",
-  requireAuth,
+  requireAdminAuth,
   async (req, res): Promise<void> => {
     const body = UpdateBusinessSettingsBody.safeParse(req.body);
     if (!body.success) {

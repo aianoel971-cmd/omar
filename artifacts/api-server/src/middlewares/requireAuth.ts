@@ -1,5 +1,6 @@
 import { clerkClient, getAuth } from "@clerk/express";
 import type { RequestHandler } from "express";
+import { clerkBypass } from "./devAuth";
 
 const adminEmails = (process.env.ADMIN_EMAILS ?? "")
   .split(/[\n,;]+/)
@@ -7,6 +8,11 @@ const adminEmails = (process.env.ADMIN_EMAILS ?? "")
   .filter(Boolean);
 
 export const requireAuth: RequestHandler = async (req, res, next) => {
+  if (clerkBypass) {
+    next();
+    return;
+  }
+
   const auth = getAuth(req);
   if (!auth.userId) {
     res.status(401).json({ error: "Unauthorized" });

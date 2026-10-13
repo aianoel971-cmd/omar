@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import HomePage from '@/pages/home';
+import GalleryPage from '@/pages/gallery';
 import QuotePage from '@/pages/quote';
 import AdminPage from '@/pages/admin';
 import NotFound from '@/pages/not-found';
@@ -24,7 +25,7 @@ function stripBase(path: string) {
 const clerkAppearance = {
   theme: shadcn,
   cssLayerName: 'clerk',
-  options: { logoPlacement: 'inside' as const, logoLinkUrl: basePath || '/', logoImageUrl: `${window.location.origin}${basePath}/logo.svg` },
+  options: { logoPlacement: 'inside' as const, logoLinkUrl: basePath || '/', logoImageUrl: `${window.location.origin}${basePath}/logo.png` },
   variables: {
     colorPrimary: '#304b43',
     colorForeground: '#293934',
@@ -91,11 +92,11 @@ function HomeRedirect() {
 }
 
 function SignInPage() {
-  return <main className="grain min-h-[100dvh] bg-[hsl(var(--background))] px-4 py-10 flex items-center justify-center"><div className="w-full max-w-md"><p className="eyebrow text-center text-[hsl(var(--muted-foreground))] mb-6">Alder & Field · Home, made better</p><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div></main>;
+  return <main className="grain min-h-[100dvh] bg-[hsl(var(--background))] px-4 py-10 flex items-center justify-center"><div className="w-full max-w-md"><p className="eyebrow text-center text-[hsl(var(--muted-foreground))] mb-6">LopezXconstruction · Home, made better</p><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div></main>;
 }
 
 function SignUpPage() {
-  return <main className="grain min-h-[100dvh] bg-[hsl(var(--background))] px-4 py-10 flex items-center justify-center"><div className="w-full max-w-md"><p className="eyebrow text-center text-[hsl(var(--muted-foreground))] mb-6">Alder & Field · Home, made better</p><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
+  return <main className="grain min-h-[100dvh] bg-[hsl(var(--background))] px-4 py-10 flex items-center justify-center"><div className="w-full max-w-md"><p className="eyebrow text-center text-[hsl(var(--muted-foreground))] mb-6">LopezXconstruction · Home, made better</p><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div></main>;
 }
 
 function ClerkRoutedApp() {
@@ -120,6 +121,7 @@ function ClerkRoutedApp() {
           <Switch>
             <Route path="/" component={HomeRedirect} />
             <Route path="/quote" component={QuotePage} />
+            <Route path="/gallery" component={GalleryPage} />
             <Route path="/admin" component={AdminPage} />
             <Route path="/sign-in/*?" component={SignInPage} />
             <Route path="/sign-up/*?" component={SignUpPage} />
@@ -133,7 +135,8 @@ function ClerkRoutedApp() {
 }
 
 function App() {
-  if (!clerkPubKey) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
+  const devClerkBypass = import.meta.env.DEV && !clerkPubKey;
+  if (!clerkPubKey && !devClerkBypass) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
   return <div className="grain min-h-[100dvh]"><WouterRouter base={basePath}><ClerkRoutedApp /></WouterRouter></div>;
 }
 

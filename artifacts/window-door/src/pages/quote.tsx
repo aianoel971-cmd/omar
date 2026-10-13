@@ -100,16 +100,16 @@ export default function QuotePage() {
       <p className="eyebrow mt-7 text-[hsl(var(--primary))]">Request received</p><h1 className="serif mt-3 text-4xl font-semibold">We’ll be in touch.</h1>
       <p className="mx-auto mt-4 max-w-sm text-sm leading-7 text-[hsl(var(--muted-foreground))]">Thanks for inviting us into your project. A member of our local team will follow up to learn more and arrange the next step.</p>
       {estimate && <div className="mt-7 rounded-xl bg-[hsl(var(--muted))] p-5"><span className="text-xs text-[hsl(var(--muted-foreground))]">Your preliminary range</span><p className="serif mt-1 text-2xl font-bold">{dollars(estimate.low, estimate.currency)} – {dollars(estimate.high, estimate.currency)}</p></div>}
-      <Link href="/" className="btn-primary mt-8" data-testid="link-success-home">Back to Alder & Field <ArrowRight size={16}/></Link>
+      <Link href="/" className="btn-primary mt-8" data-testid="link-success-home">Back to LopezXconstruction <ArrowRight size={16}/></Link>
     </div>
   </main>;
 
   return <main className="min-h-[100dvh] bg-[hsl(var(--background))]">
-    <header className="border-b border-[hsl(var(--border))]"><div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-10">
-      <Link href="/" className="flex items-center gap-3" data-testid="link-quote-home"><img src={`${import.meta.env.BASE_URL}logo.svg`} alt="" className="h-9 w-9"/><span className="serif font-extrabold">Alder & Field</span></Link>
+    <header className="border-b border-[hsl(var(--border))]"><div className="mx-auto flex max-w-full items-center justify-between px-5 py-5 md:px-10">
+      <Link href="/" className="flex items-center gap-3" data-testid="link-quote-home"><img src={`${import.meta.env.BASE_URL}logo.png`} alt="" className="h-14 w-14"/><span className="serif font-extrabold">LopezXconstruction</span></Link>
       <span className="hidden text-xs text-[hsl(var(--muted-foreground))] sm:block">A thoughtful quote, no obligation</span>
     </div></header>
-    <div className="mx-auto grid max-w-7xl gap-10 px-5 py-8 md:grid-cols-[minmax(0,1fr)_340px] md:px-10 md:py-12">
+    <div className="mx-auto grid max-w-full gap-10 px-5 py-8 md:grid-cols-[minmax(0,1fr)_340px] md:px-10 md:py-12">
       <div>
         <Link href="/" className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--muted-foreground))]" data-testid="link-back-home"><ArrowLeft size={15}/> Back to home</Link>
         <p className="eyebrow text-[hsl(var(--primary))]">Your project, your way</p><h1 className="serif mt-3 max-w-2xl text-4xl font-semibold leading-tight tracking-tight md:text-5xl">Start with a range.<br/><span className="text-[hsl(var(--muted-foreground))]">Finish with the right fit.</span></h1>
@@ -153,6 +153,6 @@ export default function QuotePage() {
         <Link href="/" className="mt-6 inline-flex items-center gap-2 text-xs font-bold text-[hsl(var(--primary))]" data-testid="link-quote-home-bottom"><Check size={14}/> No pressure. Just good advice.</Link>
       </aside>
     </div>
-    <footer className="border-t border-[hsl(var(--border))] px-5 py-6 text-center text-xs text-[hsl(var(--muted-foreground))]">Alder & Field · Thoughtful work, close to home.</footer>
+    <footer className="border-t border-[hsl(var(--border))] px-5 py-6 text-center text-xs text-[hsl(var(--muted-foreground))]">LopezXconstruction · Thoughtful work, close to home.</footer>
   </main>;
 }

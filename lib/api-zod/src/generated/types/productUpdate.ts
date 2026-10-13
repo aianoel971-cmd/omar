@@ -12,6 +12,8 @@ export interface ProductUpdate {
   description?: string;
   /** @minimum 1 */
   startingPrice?: number;
+  /** @nullable */
+  imageUrl?: string | null;
   active?: boolean;
   featured?: boolean;
   /** @nullable */
