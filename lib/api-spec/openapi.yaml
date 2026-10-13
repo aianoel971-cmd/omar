@@ -10,6 +10,14 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: products
+    description: Window and door products
+  - name: estimates
+    description: Customer estimate tools
+  - name: quotes
+    description: Customer quote requests
+  - name: admin
+    description: Business dashboard and pricing settings
 paths:
   /healthz:
     get:
@@ -24,6 +32,182 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List active products
+      parameters:
+        - name: includeInactive
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Product catalog
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+  /products/{productId}:
+    patch:
+      operationId: updateProduct
+      tags: [products, admin]
+      summary: Update a product
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductUpdate"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+  /estimates:
+    post:
+      operationId: calculateEstimate
+      tags: [estimates]
+      summary: Calculate a preliminary project estimate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EstimateInput"
+      responses:
+        "200":
+          description: Estimate range
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Estimate"
+        "404":
+          description: Product not found
+  /quotes:
+    get:
+      operationId: listQuotes
+      tags: [quotes, admin]
+      summary: List customer quote requests
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [new, contacted, scheduled, won, lost]
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Matching quote requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Quote"
+    post:
+      operationId: createQuote
+      tags: [quotes]
+      summary: Submit a customer quote request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteInput"
+      responses:
+        "201":
+          description: Quote request saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+  /quotes/{quoteId}:
+    patch:
+      operationId: updateQuote
+      tags: [quotes, admin]
+      summary: Update quote status or admin notes
+      parameters:
+        - name: quoteId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteUpdate"
+      responses:
+        "200":
+          description: Updated quote
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Quote"
+        "404":
+          description: Quote not found
+  /admin/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [admin]
+      summary: Get dashboard totals and recent quote activity
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /admin/settings:
+    get:
+      operationId: getBusinessSettings
+      tags: [admin]
+      summary: Get business and estimate settings
+      responses:
+        "200":
+          description: Current business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+    patch:
+      operationId: updateBusinessSettings
+      tags: [admin]
+      summary: Update business and estimate settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessSettingsUpdate"
+      responses:
+        "200":
+          description: Updated business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +217,125 @@ components:
           type: string
       required:
         - status
+    Product:
+      type: object
+      required: [id, slug, name, category, description, startingPrice, active, featured, features]
+      properties:
+        id: { type: string }
+        slug: { type: string }
+        name: { type: string }
+        category: { type: string, enum: [window, door] }
+        description: { type: string }
+        startingPrice: { type: number }
+        imageUrl: { type: [string, "null"] }
+        active: { type: boolean }
+        featured: { type: boolean }
+        badge: { type: [string, "null"] }
+        features:
+          type: array
+          items: { type: string }
+    ProductUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: string }
+        startingPrice: { type: number, minimum: 1 }
+        active: { type: boolean }
+        featured: { type: boolean }
+        badge: { type: [string, "null"] }
+        features:
+          type: array
+          items: { type: string }
+    EstimateInput:
+      type: object
+      required: [productId, quantity, includeInstallation, includeRemoval]
+      properties:
+        productId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 100 }
+        includeInstallation: { type: boolean }
+        includeRemoval: { type: boolean }
+    Estimate:
+      type: object
+      required: [low, high, currency, quantity]
+      properties:
+        low: { type: number }
+        high: { type: number }
+        currency: { type: string }
+        quantity: { type: integer }
+    Quote:
+      type: object
+      required: [id, name, email, phone, postalCode, projectType, productId, quantity, timeframe, includeInstallation, includeRemoval, estimateLow, estimateHigh, status, createdAt]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        postalCode: { type: string }
+        projectType: { type: string, enum: [window, door, both] }
+        productId: { type: string }
+        quantity: { type: integer }
+        timeframe: { type: string }
+        includeInstallation: { type: boolean }
+        includeRemoval: { type: boolean }
+        estimateLow: { type: number }
+        estimateHigh: { type: number }
+        status: { type: string, enum: [new, contacted, scheduled, won, lost] }
+        notes: { type: [string, "null"] }
+        adminNote: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+    QuoteInput:
+      type: object
+      required: [name, email, phone, postalCode, projectType, productId, quantity, timeframe, includeInstallation, includeRemoval]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 120 }
+        email: { type: string, format: email, maxLength: 254 }
+        phone: { type: string, minLength: 7, maxLength: 32 }
+        postalCode: { type: string, minLength: 3, maxLength: 16 }
+        projectType: { type: string, enum: [window, door, both] }
+        productId: { type: string }
+        quantity: { type: integer, minimum: 1, maximum: 100 }
+        timeframe: { type: string, enum: [asap, oneToThreeMonths, threeToSixMonths, planning] }
+        includeInstallation: { type: boolean }
+        includeRemoval: { type: boolean }
+        notes: { type: string, maxLength: 2000 }
+    QuoteUpdate:
+      type: object
+      properties:
+        status: { type: string, enum: [new, contacted, scheduled, won, lost] }
+        adminNote: { type: [string, "null"], maxLength: 2000 }
+    DashboardSummary:
+      type: object
+      required: [totalLeads, newLeads, scheduledLeads, wonLeads, pipelineValue, recentQuotes]
+      properties:
+        totalLeads: { type: integer }
+        newLeads: { type: integer }
+        scheduledLeads: { type: integer }
+        wonLeads: { type: integer }
+        pipelineValue: { type: number }
+        recentQuotes:
+          type: array
+          items: { $ref: "#/components/schemas/Quote" }
+    BusinessSettings:
+      type: object
+      required: [businessName, phone, email, serviceArea, currency, installationPerUnit, removalPerUnit, estimateBufferPercent]
+      properties:
+        businessName: { type: string }
+        phone: { type: string }
+        email: { type: string }
+        serviceArea: { type: string }
+        currency: { type: string }
+        installationPerUnit: { type: number }
+        removalPerUnit: { type: number }
+        estimateBufferPercent: { type: number }
+    BusinessSettingsUpdate:
+      type: object
+      properties:
+        businessName: { type: string, minLength: 1 }
+        phone: { type: string, minLength: 7 }
+        email: { type: string, format: email }
+        serviceArea: { type: string }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        installationPerUnit: { type: number, minimum: 0 }
+        removalPerUnit: { type: number, minimum: 0 }
+        estimateBufferPercent: { type: number, minimum: 0, maximum: 100 }
 

@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@layer theme, base, clerk, components, utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+:root {
+  --button-outline: rgba(36, 47, 45, .1);
+  --badge-outline: rgba(36, 47, 45, .08);
+  --elevate-1: rgba(36, 47, 45, .035);
+  --elevate-2: rgba(36, 47, 45, .075);
+  --background: 42 35% 96%;
+  --foreground: 168 17% 17%;
+  --border: 36 18% 85%;
+  --input: 36 18% 82%;
+  --card: 42 35% 98%;
+  --card-foreground: 168 17% 17%;
+  --card-border: 36 18% 87%;
+  --sidebar: 164 20% 19%;
+  --sidebar-foreground: 42 30% 93%;
+  --sidebar-border: 164 15% 29%;
+  --sidebar-primary: 27 55% 63%;
+  --sidebar-primary-foreground: 168 17% 17%;
+  --sidebar-accent: 164 17% 26%;
+  --sidebar-accent-foreground: 42 30% 93%;
+  --sidebar-ring: 27 55% 63%;
+  --popover: 42 35% 98%;
+  --popover-foreground: 168 17% 17%;
+  --popover-border: 36 18% 85%;
+  --primary: 164 23% 26%;
+  --primary-foreground: 42 35% 96%;
+  --secondary: 36 27% 90%;
+  --secondary-foreground: 168 17% 19%;
+  --muted: 38 22% 91%;
+  --muted-foreground: 165 8% 42%;
+  --accent: 27 55% 63%;
+  --accent-foreground: 168 17% 17%;
+  --destructive: 4 62% 48%;
+  --destructive-foreground: 42 35% 98%;
+  --ring: 164 23% 35%;
+  --chart-1: 164 28% 34%;
+  --chart-2: 27 55% 63%;
+  --chart-3: 197 22% 49%;
+  --chart-4: 42 41% 68%;
+  --chart-5: 9 40% 57%;
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-serif: 'Manrope', sans-serif;
+  --app-font-mono: 'DM Mono', monospace;
+  --radius: .75rem;
+  --shadow-sm: 0 8px 24px rgba(41, 53, 47, .07);
+}
+.dark {
+  --background: 165 19% 12%; --foreground: 42 27% 92%; --border: 164 12% 28%;
+  --input: 164 12% 30%; --card: 165 17% 15%; --card-foreground: 42 27% 92%;
+  --card-border: 164 12% 27%; --sidebar: 165 20% 9%; --sidebar-foreground: 42 27% 92%;
+  --sidebar-border: 164 12% 22%; --sidebar-primary: 27 55% 63%; --sidebar-primary-foreground: 165 20% 10%;
+  --sidebar-accent: 164 15% 18%; --sidebar-accent-foreground: 42 27% 92%; --sidebar-ring: 27 55% 63%;
+  --popover: 165 17% 15%; --popover-foreground: 42 27% 92%; --popover-border: 164 12% 28%;
+  --primary: 27 55% 63%; --primary-foreground: 165 20% 12%; --secondary: 164 13% 23%;
+  --secondary-foreground: 42 27% 92%; --muted: 164 13% 20%; --muted-foreground: 42 12% 67%;
+  --accent: 27 55% 63%; --accent-foreground: 165 20% 12%; --destructive: 4 62% 55%;
+  --destructive-foreground: 42 35% 98%; --ring: 27 55% 63%;
+  --chart-1: 164 32% 58%; --chart-2: 27 55% 63%; --chart-3: 197 32% 63%; --chart-4: 42 41% 68%; --chart-5: 9 50% 67%;
+}
+@layer base {
+  * { @apply border-border; }
+  body { @apply font-sans antialiased bg-background text-foreground; margin: 0; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 3px solid hsl(var(--accent)); outline-offset: 3px; }
+}
+.serif { font-family: var(--app-font-serif); }
+.eyebrow { letter-spacing: .16em; text-transform: uppercase; font-size: .68rem; font-weight: 700; }
+.grain::after { content: ''; pointer-events: none; position: fixed; inset: 0; opacity: .035; z-index: 20; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E"); }
+.reveal { animation: rise .65s cubic-bezier(.2,.75,.25,1) both; }
+.reveal-delay { animation: rise .75s .12s cubic-bezier(.2,.75,.25,1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.field { width:100%; border:1px solid hsl(var(--border)); background: hsl(var(--card)); border-radius:.6rem; padding:.78rem .9rem; color:hsl(var(--foreground)); transition:border-color .18s, box-shadow .18s; }
+.field:focus { outline:0; border-color:hsl(var(--primary)); box-shadow:0 0 0 3px hsl(var(--primary)/.12); }
+.btn-primary { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; border-radius:999px; padding:.88rem 1.25rem; background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); font-weight:700; transition:transform .2s, background .2s; }
+.btn-primary:hover { transform:translateY(-2px); background:hsl(164 23% 21%); }
+.btn-secondary { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:1px solid hsl(var(--border)); border-radius:999px; padding:.82rem 1.15rem; background:transparent; font-weight:650; transition:background .2s; }
+.btn-secondary:hover { background:hsl(var(--muted)); }
+.admin-nav { transition:background .18s,color .18s; }
+.admin-nav:hover { background: hsl(var(--sidebar-accent)); }
+.table-scroll { overflow-x:auto; }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }

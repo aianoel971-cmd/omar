@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Windows & Doors"
+description = "A responsive website for a window and door installation business, with a product catalog, interactive estimate calculator, customer quote requests, and an admin dashboard for lead and pricing management."
+version = "1.0.0"
+id = "artifacts/window-door"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19688
+
+[services.development]
+run = "pnpm --filter @workspace/window-door run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/window-door", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/window-door/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19688"
+BASE_PATH = "/"
