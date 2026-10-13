@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, ilike, or } from "drizzle-orm";
-import { getAuth } from "@clerk/express";
 import { Router, type IRouter } from "express";
 import {
   CalculateEstimateBody,
@@ -56,29 +55,34 @@ async function calculatePrice(
   return { low, high, currency: settings.currency, quantity };
 }
 
-router.get("/products", async (req, res): Promise<void> => {
-  const parsed = ListProductsQueryParams.safeParse(req.query);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
+router.get(
+  "/products",
+  async (req, res, next): Promise<void> => {
+    if (req.query.includeInactive !== "true") {
+      next();
+      return;
+    }
+    await requireAuth(req, res, next);
+  },
+  async (req, res): Promise<void> => {
+    const parsed = ListProductsQueryParams.safeParse(req.query);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.message });
+      return;
+    }
 
-  const includeInactive = req.query.includeInactive === "true";
-  if (includeInactive && !getAuth(req).userId) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
-  }
+    const includeInactive = req.query.includeInactive === "true";
+    const products = await db
+      .select()
+      .from(productsTable)
+      .where(
+        includeInactive ? undefined : eq(productsTable.active, true),
+      )
+      .orderBy(desc(productsTable.featured), productsTable.name);
 
-  const products = await db
-    .select()
-    .from(productsTable)
-    .where(
-      includeInactive ? undefined : eq(productsTable.active, true),
-    )
-    .orderBy(desc(productsTable.featured), productsTable.name);
-
-  res.json(ListProductsResponse.parse(products));
-});
+    res.json(ListProductsResponse.parse(products));
+  },
+);
 
 router.patch(
   "/products/:productId",
